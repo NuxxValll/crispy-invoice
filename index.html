@@ -1,0 +1,939 @@
+> $rispy_invoices (id, archive_name, invoice_date, invoice_status, to_user, t<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crispy Network — Invoice Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        corePlugins: {
+          preflight: false, 
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --container-bg: #11141a;
+            --accent-yellow: #fbc02d;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.07);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .max-w { max-width: 1100px; margin: 0 auto; }
+        .hidden { display: none !important; }
+        
+        // BANNER
+        header { 
+            width: 100%;
+            background-image: linear-gradient(to bottom, rgba(7, 9, 14, 0.2) 0%, rgba(7, 9, 14, 0.8) 75%, var(--bg-dark) 100%), url('bg.jpg');
+            background-size: cover; 
+            background-repeat: no-repeat; 
+            background-position: center center; 
+            padding: 20px 40px 40px 40px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center;
+            position: relative;
+        }
+
+        .header-logout-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .btn-logout { 
+            border: 2px solid rgba(251, 192, 45, 0.5); 
+            color: var(--accent-yellow); 
+            background: transparent;
+            padding: 8px 20px; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-weight: 700; 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease; 
+        }
+        .btn-logout:hover { 
+            background: var(--accent-yellow); 
+            color: #000; 
+            box-shadow: 0 0 12px rgba(251, 192, 45, 0.4);
+        }
+        
+        .brand-title { 
+            font-size: 42px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 35px; 
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8); 
+            line-height: 1.1;
+        }
+        
+        // NAVIGASI
+        nav { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        nav button {
+            background: none; border: none; color: var(--text-main); font-family: inherit; font-weight: 700; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 4px; cursor: pointer; transition: color 0.2s; position: relative;
+        }
+        nav button:hover, nav button.active { color: var(--accent-yellow); }
+        nav button.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: var(--accent-yellow); }
+        
+        // KONTEN UTAMA & PANEL
+        .content-wrapper {
+            max-width: 900px;
+            margin: -10px auto 50px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-panel {
+            background: var(--container-bg); 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            padding: 30px;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .search-area { margin-bottom: 30px; }
+        .search-box { max-width: 550px; margin: 0 auto; position: relative; }
+        .search-box input { 
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.3); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-family: inherit; 
+            font-size: 14px; 
+            outline: none;
+            text-align: center;
+        }
+        .search-box input:focus { 
+            border-color: var(--accent-yellow); 
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        // AREA TOMBOL
+        .action-area {
+            margin-bottom: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .btn-blue { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            color: white; 
+            padding: 12px 40px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        .btn-blue:hover { 
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 15px rgba(251, 192, 45, 0.15);
+            transform: translateY(-1px);
+        }
+        .btn-blue:active { transform: translateY(1px); }
+
+        .history-area {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 25px;
+        }
+        
+        // INVOICE LIST & BADGES
+        .invoice-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px 10px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .invoice-item:last-child { border-bottom: none; }
+        
+        // Animasi Dihapus
+        .invoice-item.fade-out {
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+            padding-top: 0;
+            padding-bottom: 0;
+            height: 0;
+            overflow: hidden;
+            border: none;
+        }
+
+        .inv-badge { background: rgba(251, 192, 45, 0.1); color: var(--accent-yellow); font-weight: 700; padding: 4px 8px; border-radius: 5px; font-size: 11px; font-family: monospace; border: 1px solid rgba(251, 192, 45, 0.2); text-transform: uppercase; }
+        .inv-info { flex: 1; min-width: 220px; }
+        .inv-title { font-weight: 700; font-size: 15px; color: #ffffff; margin: 6px 0 4px 0; }
+        .inv-meta { font-size: 12px; color: var(--text-muted); }
+        .inv-right { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+        
+        .status-tag { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px; border: 1px solid; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-lunas { background: rgba(74, 222, 128, 0.12); color: #4ade80; border-color: rgba(74, 222, 128, 0.25); }
+        .status-belum { background: rgba(248, 113, 113, 0.12); color: #f87171; border-color: rgba(248, 113, 113, 0.25); }
+        
+        .inv-total-text { font-weight: 700; font-size: 14px; color: #e2e8f0; min-width: 100px; text-align: right; }
+        .actions { display: flex; gap: 6px; }
+
+        .btn-action-edit, .btn-action-delete {
+            padding: 6px 12px; font-family: inherit; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 5px; border: none; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-action-edit { background-color: #10b981; color: #fff; }
+        .btn-action-edit:hover { background-color: #059669; transform: translateY(-1px); }
+        .btn-action-delete { background-color: #ef4444; color: #fff; }
+        .btn-action-delete:hover { background-color: #dc2626; transform: translateY(-1px); }
+
+        .badge-cat { padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-left: 5px; vertical-align: middle; display: inline-block; }
+        .bg-item { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .bg-rank { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .bg-effect { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .bg-skill { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+        .bg-command { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .bg-base { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+
+        // EDITOR SYSTEM & STYLING
+        .editor-grid { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 20px 15px; }
+        @media(min-width: 768px) { .editor-grid { grid-template-columns: 330px 1fr; } }
+        
+        .sidebar { background: var(--container-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); height: max-content; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .sidebar h3 { font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; color: var(--accent-yellow); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        
+        .form-control { width: 100%; padding: 10px 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; color: #ffffff; outline: none; font-family: inherit; }
+        .form-control:focus { border-color: var(--accent-yellow); }
+        
+        .tags-selector-container { display: flex; flex-wrap: wrap; gap: 6px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; }
+        .tag-checkbox-label {
+            display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.03); color: var(--text-muted); transition: all 0.15s ease; user-select: none;
+        }
+        .tag-checkbox-label input { display: none; }
+        .tag-checkbox-label:has(input:checked) {
+            border-color: var(--accent-yellow); color: #000000; background-color: var(--accent-yellow); box-shadow: 0 0 8px rgba(251, 192, 45, 0.2);
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        // Baris Item Control Animasi
+        .item-row-control { 
+            background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); padding: 35px 10px 10px 10px; border-radius: 8px; margin-bottom: 8px; position: relative;
+            animation: rowIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transition: all 0.3s ease;
+        }
+        .item-row-control:first-child { padding: 10px; }
+        
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .item-row-control.row-out {
+            opacity: 0; transform: scale(0.9) translateY(-10px); max-height: 0; padding: 0; margin: 0; overflow: hidden; border: none;
+        }
+        
+        .btn-del-row { position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-del-row:hover { background: #ef4444; color: #fff; }
+        #btn-add-item { background: #1f6feb; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        #btn-add-item:hover { background: #58a6ff; }
+        
+        // PAPER PREVIEW
+        .paper-container { display: flex; justify-content: center; overflow-x: auto; }
+        .invoice-paper { background: white; width: 100%; max-width: 750px; min-height: 950px; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; color: #1e293b; }
+        .p-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px; }
+        .p-title { text-align: right; }
+        .p-title h2 { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #1e293b; }
+        .p-title .id-text { color: #475569; font-weight: bold; font-size: 14px; }
+        .p-title .date-text { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+        .p-title .date-text span { color: #475569; font-weight: bold; }
+        
+        .p-grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .info-label { font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .info-bold { font-size: 15px; font-weight: bold; color: #1e293b; }
+        .info-sm { font-size: 13px; color: #64748b; margin-top: 2px; }
+        
+        .preview-tags-wrapper { display: flex; flex-wrap: wrap; gap: 6px; }
+        .badge-type { display: inline-block; background: #eff6ff; color: #2563eb; font-weight: bold; font-size: 12px; padding: 4px 12px; border-radius: 6px; border: 1px solid #bfdbfe; text-transform: uppercase; }
+        
+        .p-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; text-align: left; }
+        .p-table th { border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+        .p-table td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; font-weight: 500; }
+        
+        .p-calculation-block { display: flex; flex-direction: column; align-items: flex-end; border-top: 1px solid #cbd5e1; padding-top: 12px; gap: 8px; }
+        .p-calc-row { display: flex; width: 280px; justify-content: space-between; font-size: 13px; color: #64748b; font-weight: 500; }
+        .p-calc-row.grand-total { font-size: 16px; font-weight: 900; color: #0f172a; border-top: 1px dashed #e2e8f0; padding-top: 8px; margin-top: 2px; }
+        
+        .important-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; font-size: 11px; color: #94a3b8; line-height: 1.6; }
+        .important-box h4 { color: #475569; font-size: 12px; margin-bottom: 4px; font-weight: bold; }
+        .thanks-text { text-align: center; font-size: 12px; font-weight: bold; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 25px; }
+
+        .nav-editor { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; padding: 20px 15px 0 15px; }
+        .btn-back { background: none; border: none; font-weight: bold; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; transition: color 0.2s; }
+        .btn-back:hover { color: var(--accent-yellow); }
+        .editor-actions { display: flex; gap: 8px; }
+        .btn-green { background: #238636; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; text-transform: uppercase; transition: background 0.2s; }
+        .btn-green:hover { background: #2ea44f; }
+        .btn-gray { background: #334155; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; text-transform: uppercase; transition: background 0.2s; }
+        .btn-gray:hover { background: #475569; }
+
+        // ANIMASI TRANSISI HALAMAN & KONTEKS
+        .page-fade-in {
+            animation: pageEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        // Animasi Geser Kategori
+        .fade-slide-in {
+            animation: categoryChange 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes categoryChange {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            header { padding: 20px 20px 30px 20px; }
+            .brand-title { font-size: 32px; }
+            .invoice-item { flex-direction: column; align-items: flex-start; }
+            .inv-right { width: 100%; justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #invoice-paper, #invoice-paper * { visibility: visible; }
+            #invoice-paper { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0;}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-page" class="page-fade-in">
+        <header>
+            <div class="header-logout-container">
+                <a href="logout.php" class="btn-logout">Logout</a>
+            </div>
+            
+            <div class="brand-title">Crispy Network Invoice</div>
+            
+            <nav>
+                <button id="nav-all" class="active" onclick="filterCategory('all', this)">Beranda</button>
+                <button id="nav-item" onclick="filterCategory('item', this)">Item</button>
+                <button id="nav-rank" onclick="filterCategory('rank', this)">Rank</button>
+                <button id="nav-effect" onclick="filterCategory('effect', this)">Effect</button>
+                <button id="nav-skill" onclick="filterCategory('skill', this)">Skill</button>
+                <button id="nav-command" onclick="filterCategory('command', this)">Command</button>
+                <button id="nav-base" onclick="filterCategory('base', this)">Base</button>
+            </nav>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="main-panel">
+                
+                <div class="search-area">
+                    <div class="section-label">Cari Invoice</div>
+                    <div class="search-box">
+                        <input type="text" id="search-input" oninput="renderInvoiceList()" placeholder="Cari berdasarkan Nomor Invoice atau Nama Player...">
+                    </div>
+                </div>
+            
+                <div class="action-area">
+                    <button onclick="createNewInvoice()" class="btn-blue">Buat Invoice Baru</button>
+                </div>
+
+                <div class="history-area">
+                    <div class="section-label" style="text-align: left; margin-bottom: 15px; color: var(--text-muted);">Riwayat Invoice</div>
+                    <div id="invoice-list-container"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="editor-page" class="max-w hidden">
+        <div class="nav-editor">
+            <button onclick="backToDashboard()" class="btn-back">Kembali ke Dashboard</button>
+            <div class="editor-actions">
+                <button onclick="window.print()" class="btn-gray">Cetak / PDF</button>
+                <button onclick="saveAndExit()" class="btn-green">Simpan & Keluar</button>
+            </div>
+        </div>
+
+        <div class="editor-grid">
+            <div class="sidebar">
+                <h3>Pengaturan Invoice</h3>
+                <div class="form-group">
+                    <label>Nama Arsip / Invoice</label>
+                    <input type="text" id="form-archive-name" oninput="syncPreview()" class="form-control">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Tanggal</label>
+                        <input type="date" id="form-date" onchange="syncPreview()" onclick="if(this.showPicker) this.showPicker();" class="bg-[#11141a] border border-[#ffffff12] text-white text-[13px] rounded-md focus:ring-[#fbc02d] focus:border-[#fbc02d] block w-full p-2.5 outline-none transition-all">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="form-status" onchange="syncPreview()" class="bg-[#11141a] border border-[#ffffff12] text-white text-[13px] rounded-md focus:ring-[#fbc02d] focus:border-[#fbc02d] block w-full p-2.5 outline-none transition-all">
+                            <option value="Lunas">Lunas</option>
+                            <option value="Belum Lunas">Belum Lunas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Untuk (User)</label>
+                        <input type="text" id="form-to-user" oninput="syncPreview()" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Discord Tag</label>
+                        <input type="text" id="form-to-discord" oninput="syncPreview()" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Jenis Pembelian</label>
+                    <div class="tags-selector-container">
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Item" onchange="syncPreview()">Item</label>
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Rank" onchange="syncPreview()">Rank</label>
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Effect" onchange="syncPreview()">Effect</label>
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Skill" onchange="syncPreview()">Skill</label>
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Command" onchange="syncPreview()">Command</label>
+                        <label class="tag-checkbox-label"><input type="checkbox" value="Base" onchange="syncPreview()">Base</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Diskon (%)</label>
+                    <input type="input" id="form-discount" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, ''); syncPreview();" class="bg-[#11141a] border border-[#ffffff12] text-white text-[13px] rounded-md focus:ring-[#fbc02d] focus:border-[#fbc02d] block w-full p-2.5 outline-none transition-all">
+                </div>
+
+                <div style="margin-top:15px; border-top:1px solid var(--border-color); padding-top:10px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <label style="font-size:11px; font-weight:bold; color:var(--text-muted);">DAFTAR ITEM (MAKS 10)</label>
+                        <button onclick="addItemRow()" id="btn-add-item">Tambah</button>
+                    </div>
+                    <div id="form-items-container"></div>
+                </div>
+            </div>
+
+            <div class="paper-container">
+                <div id="invoice-paper" class="invoice-paper">
+                    <div>
+                        <div class="p-header">
+                            <div>
+                               <img src="logo.png" alt="Crispy Network" style="height:55px; max-width:200px; object-fit:contain;">
+                            </div>
+                            <div class="p-title">
+                                <h2>Invoice</h2>
+                                <p id="preview-id" class="id-text">CN-0001</p>
+                                <p class="date-text">Tanggal: <span id="preview-date">-</span></p>
+                                <div style="margin-top:8px;">
+                                    <span id="preview-status" class="status-tag status-lunas">Lunas</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-grid-info">
+                            <div>
+                                <p class="info-label">Untuk:</p>
+                                <p id="preview-to-user" class="info-bold">-</p>
+                                <p id="preview-to-discord" class="info-sm">-</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p class="info-label">Dari:</p>
+                                <p class="info-bold">Crispy Network</p>
+                                <p class="info-sm">admin@crispymc.net</p>
+                                <p class="info-sm">www.crispymc.net</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 25px;">
+                            <p class="info-label" style="color:#1e293b; margin-bottom:6px;">Jenis Pembelian:</p>
+                            <div id="preview-tags-container" class="preview-tags-wrapper">
+                                <span class="badge-type">Item</span>
+                            </div>
+                        </div>
+
+                        <table class="p-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th style="text-align:center; width:70px;">Jumlah</th>
+                                    <th style="text-align:right; width:120px;">Harga Satuan</th>
+                                    <th style="text-align:right; width:130px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="preview-table-body"></tbody>
+                        </table>
+
+                        <div class="p-calculation-block">
+                            <div id="preview-subtotal-row" class="p-calc-row hidden">
+                                <span>Subtotal</span>
+                                <span id="preview-subtotal-val">Rp 0</span>
+                            </div>
+                            <div id="preview-discount-row" class="p-calc-row hidden" style="color: #ef4444;">
+                                <span id="preview-discount-label">Discount (0%)</span>
+                                <span id="preview-discount-val">-Rp 0</span>
+                            </div>
+                            <div class="p-calc-row grand-total">
+                                <span style="color:#1e293b;">Total</span>
+                                <span id="preview-total">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="important-box">
+                            <h4>Penting:</h4>
+                            <p style="margin-bottom:5px;">Uang yang digunakan untuk pembelian rank atau item bersifat donasi dan tidak dapat dikembalikan (non-refundable).</p>
+                            <p style="margin-bottom:5px;">Simpan invoice ini sebagai bukti pembayaran. Invoice ini diperlukan untuk proses pengulangan rank atau item jika terjadi masalah.</p>
+                        </div>
+                        <p class="thanks-text">Terima kasih atas pembelian Anda di Crispy Network!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let invoices = [];
+        let currentEditingId = null;
+        let activeFilter = 'all';
+
+        function formatRupiah(angka) {
+            return "Rp " + Number(angka).toLocaleString('id-ID');
+        }
+
+        window.onload = function() {
+            loadInvoicesFromDatabase();
+        };
+
+        function loadInvoicesFromDatabase() {
+            fetch('invoice.php?action=load')
+                .then(res => res.json())
+                .then(data => {
+                    invoices = data;
+                    renderInvoiceList();
+                });
+        }
+
+        function filterCategory(category, element) {
+            activeFilter = category.toLowerCase();
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Animasi Smooth Switch Kategori pada list container
+            const container = document.getElementById('invoice-list-container');
+            if(container) {
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(8px)';
+                setTimeout(() => {
+                    renderInvoiceList();
+                    container.classList.remove('fade-slide-in');
+                    void container.offsetWidth; // Trigger reflow
+                    container.classList.add('fade-slide-in');
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                }, 150);
+            }
+        }
+
+        function renderInvoiceList() {
+            const container = document.getElementById('invoice-list-container');
+            const query = document.getElementById('search-input').value.toLowerCase();
+            if (!container) return;
+            container.innerHTML = '';
+
+            const filtered = invoices.filter(inv => {
+                const matchSearch = inv.id.toLowerCase().includes(query) || inv.archiveName.toLowerCase().includes(query) || inv.toUser.toLowerCase().includes(query);
+                
+                let matchCategory = false;
+                if (activeFilter === 'all') {
+                    matchCategory = true;
+                } else if (Array.isArray(inv.purchaseType)) {
+                    matchCategory = inv.purchaseType.some(t => t.toLowerCase() === activeFilter);
+                } else if (typeof inv.purchaseType === 'string') {
+                    matchCategory = inv.purchaseType.toLowerCase() === activeFilter;
+                }
+                
+                return matchSearch && matchCategory;
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="padding:25px; text-align:center; color:var(--text-muted); font-size:13px;">Tidak ada invoice yang cocok dengan kriteria pencarian.</div>`;
+                return;
+            }
+
+            filtered.forEach(inv => {
+                const statusClass = inv.status === 'Lunas' ? 'status-lunas' : 'status-belum';
+                const div = document.createElement('div');
+                div.className = "invoice-item";
+                div.id = `invoice-row-${inv.id}`;
+                
+                let badgesHTML = '';
+                if (Array.isArray(inv.purchaseType)) {
+                    inv.purchaseType.forEach(cat => {
+                        let c = cat.toLowerCase();
+                        badgesHTML += `<span class="badge-cat bg-${c}">${c}</span>`;
+                    });
+                } else {
+                    let cat = inv.purchaseType ? inv.purchaseType.toLowerCase() : 'item';
+                    badgesHTML = `<span class="badge-cat bg-${cat}">${cat}</span>`;
+                }
+                
+                div.innerHTML = `
+                    <div class="inv-info">
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <span class="inv-badge">${inv.id}</span>
+                            ${badgesHTML}
+                        </div>
+                        <div class="inv-title">${inv.archiveName}</div>
+                        <div class="inv-meta">${formatTanggal(inv.date)} • ${inv.toUser || '-'} (${inv.toDiscord || '-'})</div>
+                    </div>
+                    <div class="inv-right">
+                        <span class="status-tag ${statusClass}">${inv.status}</span>
+                        <span class="inv-total-text">${formatRupiah(inv.total)}</span>
+                        <div class="actions">
+                            <button onclick="openInvoiceEditor('${inv.id}')" class="btn-action-edit">Edit</button>
+                            <button onclick="deleteInvoice('${inv.id}')" class="btn-action-delete">Hapus</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function createNewInvoice() {
+            let nextNum = 1;
+            if (invoices.length > 0) {
+                const ids = invoices.map(i => parseInt(i.id.replace('CN-', ''))).filter(n => !isNaN(n));
+                if(ids.length > 0) nextNum = Math.max(...ids) + 1;
+            }
+            const formattedNum = String(nextNum).padStart(4, '0');
+            const newId = `CN-${formattedNum}`;
+            
+            const d = new Date();
+            const todayISO = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+
+            const newInv = {
+                id: newId, archiveName: newId, date: todayISO, status: "Lunas",
+                toUser: "", toDiscord: "", purchaseType: ["Item"], discount: 0, 
+                items: [{ name: "", qty: "", price: "" }], total: 0
+            };
+
+            invoices.push(newInv);
+            
+            // Efek Smooth transisi ke halaman baru saat klik "Buat Baru"
+            const dbPage = document.getElementById('dashboard-page');
+            dbPage.style.opacity = '0';
+            setTimeout(() => {
+                openInvoiceEditor(newId);
+            }, 200);
+        }
+
+        function openInvoiceEditor(id) {
+            currentEditingId = id;
+            const inv = invoices.find(i => i.id === id);
+            if(!inv) return;
+
+            document.getElementById('form-archive-name').value = inv.archiveName;
+            document.getElementById('form-date').value = inv.date; 
+            document.getElementById('form-status').value = inv.status;
+            document.getElementById('form-to-user').value = inv.toUser;
+            document.getElementById('form-to-discord').value = inv.toDiscord;
+            document.getElementById('form-discount').value = inv.discount || "";
+
+            const checkboxes = document.querySelectorAll('.tags-selector-container input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (Array.isArray(inv.purchaseType)) {
+                    cb.checked = inv.purchaseType.includes(cb.value);
+                } else {
+                    cb.checked = (inv.purchaseType === cb.value);
+                }
+            });
+
+            const itemsContainer = document.getElementById('form-items-container');
+            itemsContainer.innerHTML = '';
+            inv.items.forEach((item, index) => {
+                createItemRowUI(item.name, item.qty, item.price, index);
+            });
+
+            syncPreview();
+            
+            // Animasi transisi antar-halaman (Masuk ke Editor Halaman)
+            const dbPage = document.getElementById('dashboard-page');
+            const edPage = document.getElementById('editor-page');
+            
+            dbPage.classList.add('hidden');
+            edPage.classList.remove('hidden');
+            edPage.classList.remove('page-fade-in');
+            void edPage.offsetWidth; // reflow
+            edPage.classList.add('page-fade-in');
+        }
+
+        function createItemRowUI(name, qty, price, index) {
+            const container = document.getElementById('form-items-container');
+            const div = document.createElement('div');
+            div.className = "item-row-control";
+            div.id = `item-row-${index}`;
+            div.dataset.index = index;
+            
+            const btnHapus = index === 0 ? '' : `<button onclick="removeItemRow(${index})" class="btn-del-row">Hapus</button>`;
+            let formattedPrice = formatRibuanInput(price);
+            
+            div.innerHTML = `
+                ${btnHapus}
+                <div class="form-group" style="margin-bottom:6px;">
+                    <input type="text" value="${name}" placeholder="Nama Item" oninput="updateItemData(${index}, 'name', this.value)" class="form-control">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="input" value="${qty}" placeholder="Qty" oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateItemData(${index}, 'qty', this.value)" class="bg-[#11141a] border border-[#ffffff12] text-white text-[13px] rounded-md focus:ring-[#fbc02d] focus:border-[#fbc02d] block w-full p-2.5 outline-none transition-all">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="text" value="${formattedPrice}" placeholder="Harga" oninput="handlePriceInput(this, ${index})" class="form-control">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addItemRow() {
+            const inv = invoices.find(i => i.id === currentEditingId);
+            if(!inv) return;
+            if(inv.items.length >= 10) { alert("Maksimal 10 item!"); return; }
+
+            inv.items.push({ name: "", qty: "", price: "" });
+            
+            const idx = inv.items.length - 1;
+            createItemRowUI("", "", "", idx);
+            syncPreview();
+        }
+
+        function removeItemRow(index) {
+            const inv = invoices.find(i => i.id === currentEditingId);
+            if(!inv) return;
+            
+            const el = document.getElementById(`item-row-${index}`);
+            if(el) {
+                el.classList.add('row-out');
+                setTimeout(() => {
+                    inv.items.splice(index, 1);
+                    const itemsContainer = document.getElementById('form-items-container');
+                    itemsContainer.innerHTML = '';
+                    inv.items.forEach((item, idx) => {
+                        createItemRowUI(item.name, item.qty, item.price, idx);
+                    });
+                    syncPreview();
+                }, 250);
+            }
+        }
+
+        function updateItemData(index, key, val) {
+            const inv = invoices.find(i => i.id === currentEditingId);
+            if(!inv) return;
+            
+            if(key === 'qty' || key === 'price') {
+                inv.items[index][key] = val === "" ? "" : Number(val);
+            } else {
+                inv.items[index][key] = val;
+            }
+            syncPreview();
+        }
+
+        function formatTanggal(tglStr) {
+            if(!tglStr) return "-";
+            const parts = tglStr.split('-');
+            if(parts.length === 3) {
+                const bulanIndo = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                return `${parseInt(parts[2], 10)} ${bulanIndo[parseInt(parts[1], 10)]} ${parts[0]}`;
+            }
+            return tglStr;
+        }
+
+        function syncPreview() {
+            const inv = invoices.find(i => i.id === currentEditingId);
+            if(!inv) return;
+
+            inv.archiveName = document.getElementById('form-archive-name').value;
+            document.title = inv.archiveName || inv.id;
+            inv.date = document.getElementById('form-date').value;
+            inv.status = document.getElementById('form-status').value;
+            inv.toUser = document.getElementById('form-to-user').value;
+            inv.toDiscord = document.getElementById('form-to-discord').value;
+            
+            const checkedBoxes = document.querySelectorAll('.tags-selector-container input[type="checkbox"]:checked');
+            inv.purchaseType = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if (inv.purchaseType.length === 0) {
+                inv.purchaseType = ["Item"];
+            }
+            
+            let discInput = document.getElementById('form-discount');
+            if (Number(discInput.value) > 100) discInput.value = 100;
+            if (Number(discInput.value) < 0) discInput.value = 0;
+            
+            inv.discount = Number(discInput.value) || 0;
+
+            document.getElementById('preview-id').innerText = inv.archiveName || inv.id; 
+            document.getElementById('preview-date').innerText = formatTanggal(inv.date);
+            document.getElementById('preview-to-user').innerText = inv.toUser || "-";
+            document.getElementById('preview-to-discord').innerText = inv.toDiscord || "-";
+
+            const tagsContainer = document.getElementById('preview-tags-container');
+            tagsContainer.innerHTML = '';
+            inv.purchaseType.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'badge-type';
+                span.innerText = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            const statusEl = document.getElementById('preview-status');
+            statusEl.innerText = inv.status;
+            statusEl.className = inv.status === 'Lunas' ? "status-tag status-lunas" : "status-tag status-belum";
+
+            let subtotal = 0;
+            const tbody = document.getElementById('preview-table-body');
+            tbody.innerHTML = '';
+
+            inv.items.forEach(item => {
+                const q = Number(item.qty) || 0;
+                const p = Number(item.price) || 0;
+                const rowSub = q * p;
+                subtotal += rowSub;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name || '<span style="color:#cbd5e1">Nama Item...</span>'}</td>
+                    <td style="text-align:center;">${item.qty === "" ? "0" : item.qty}</td>
+                    <td style="text-align:right;">${formatRupiah(p)}</td>
+                    <td style="text-align:right;">${formatRupiah(rowSub)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            let discountAmount = 0;
+            if(inv.discount > 0) {
+                discountAmount = (inv.discount / 100) * subtotal;
+                document.getElementById('preview-subtotal-row').classList.remove('hidden');
+                document.getElementById('preview-subtotal-val').innerText = formatRupiah(subtotal);
+                document.getElementById('preview-discount-row').classList.remove('hidden');
+                document.getElementById('preview-discount-label').innerText = `Discount (${inv.discount}%)`;
+                document.getElementById('preview-discount-val').innerText = "-" + formatRupiah(discountAmount);
+            } else {
+                document.getElementById('preview-subtotal-row').classList.add('hidden');
+                document.getElementById('preview-discount-row').classList.add('hidden');
+            }
+
+            inv.total = subtotal - discountAmount;
+            document.getElementById('preview-total').innerText = formatRupiah(inv.total);
+        }
+
+        function formatRibuanInput(angka) {
+            if (!angka && angka !== 0) return "";
+            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function handlePriceInput(element, index) {
+            let rawValue = element.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+            element.value = formatRibuanInput(rawValue);
+            updateItemData(index, 'price', rawValue);
+        }
+
+        function saveAndExit() {
+            const inv = invoices.find(i => i.id === currentEditingId);
+            if(!inv) return;
+
+            fetch('invoice.php?action=save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(inv)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') backToDashboard();
+            });
+        }
+
+        function deleteInvoice(id) {
+            if(confirm(`Hapus permanen invoice ${id}?`)) {
+                const row = document.getElementById(`invoice-row-${id}`);
+                if (row) {
+                    // Animasi Smooth Fade-Out saat invoice dihapus
+                    row.classList.add('fade-out');
+                    setTimeout(() => {
+                        fetch(`invoice.php?action=delete&id=${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data.status === 'success') {
+                                invoices = invoices.filter(i => i.id !== id);
+                                renderInvoiceList();
+                            }
+                        });
+                    }, 400);
+                }
+            }
+        }
+
+        function backToDashboard() {
+            currentEditingId = null;
+            
+            // Animasi transisi balik ke Dashboard Halaman
+            const edPage = document.getElementById('editor-page');
+            const dbPage = document.getElementById('dashboard-page');
+            
+            edPage.style.opacity = '0';
+            setTimeout(() => {
+                loadInvoicesFromDatabase();
+                edPage.classList.add('hidden');
+                edPage.style.opacity = '1'; // Reset opacity untuk sesi berikutnya
+                
+                dbPage.classList.remove('hidden');
+                dbPage.classList.remove('page-fade-in');
+                void dbPage.offsetWidth; // reflow
+                dbPage.classList.add('page-fade-in');
+            }, 200);
+        }
+    </script>
+</body>
+</html>
